@@ -1,5 +1,7 @@
 setwd("~/Desktop/Petra Palenikova/")
 
+library(ggplot2)
+
 CtrlGrowthEffect <- read.csv(header = TRUE, "dataSUR/ControlGrowth.csv") 
 # Control, cutting gRNAs targeting genes that DO affect cell fitness (aka essential genes). These gRNAs will kill cells (i.e. drop out) no matter what is the effect on the STAT5 reporte
 
@@ -63,8 +65,12 @@ FoldChange <- as.data.frame(apply(aggregatedCtrls.countOnly, 2, function(x) log2
 
 
 
-
-
+# HEY LOOK A PLOT
+ggplot(data=FoldChange, aes(x=SUR1.250x.A.DPI15, y=SUR3.250x.A.DPI15)) +
+    geom_point() +
+    geom_abline(intercept = 0, slope = 1)
+# There are indeed differences in foldchange across that there sample. Back to the plan. 
+       
 
 # Compute difference between Pool & Sample 
 
