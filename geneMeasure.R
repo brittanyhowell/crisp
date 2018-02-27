@@ -2,22 +2,22 @@ setwd("~/Desktop/Petra Palenikova/")
 
 library(ggplot2)
 
-CtrlGrowthEffect <- read.csv(header = TRUE, "dataSUR/ControlGrowth.csv") 
-# Control, cutting gRNAs targeting genes that DO affect cell fitness (aka essential genes). These gRNAs will kill cells (i.e. drop out) no matter what is the effect on the STAT5 reporte
+CtrlGrowthEffect.file <- read.csv(header = TRUE, "dataSUR/ControlGrowth.csv") 
+# Control, cutting gRNAs targeting genes that DO affect cell fitness (aka essential genes). These gRNAs will kill cells (i.e. drop out) no matter what is the effect on the STAT5 reporter
 
-CtrlNoCut <- read.csv(header = TRUE, "dataSUR/ControlNoCutting.csv") 
+CtrlNoCut.file <- read.csv(header = TRUE, "dataSUR/ControlNoCutting.csv") 
 # Control, non-cutting gRNAs (completely ineffective) 
 
-CtrlNoGrowthEffect <- read.csv(header = TRUE, "dataSUR/ControlNoGrowth.csv") 
+CtrlNoGrowthEffect.file <- read.csv(header = TRUE, "dataSUR/ControlNoGrowth.csv") 
 # Control, cutting gRNAs targeting genes that do not affect cell fitness
 
-JakSTAT <- read.csv(header = TRUE, "dataSUR/JakStatPathway.csv")
+JakSTAT.file <- read.csv(header = TRUE, "dataSUR/JakStatPathway.csv")
 # gRNAs targeting genes belonging to or associated to Jak/STAT pathway. Part of these gRNAs may be essential and kill cells, no matter what is the effect on the STAT5 reporter. Other gRNAs may have little or no “direct” effect on cell fitness but if neomycin is applied the can increase/decrease it depending on their positive/negative effect on the reporter by increasing/decreasing the expression of the neoR gene.
 
 
 
 # Mix up the order of the cutting, but not affecting the growth controls
-rand.CtrlNoGrowthEffect <- CtrlNoGrowthEffect[sample(1:nrow(CtrlNoGrowthEffect)), ]
+rand.CtrlNoGrowthEffect <- CtrlNoGrowthEffect.file[sample(1:nrow(CtrlNoGrowthEffect.file)), ]
 
 ## make a list of numbers in groups of 5. 
   # determine how many rows you need
@@ -61,7 +61,36 @@ aggregatedCtrls <- aggregate(x=rand.CtrlNoGrowthEffect, by = list(index), FUN=su
 JakSTAT.pool <- aggregatedCtrls$JakSTATpool
 aggregatedCtrls.countOnly <- subset(aggregatedCtrls, select = -c(Kosuke_Id, Group.1, JakSTATpool))
 
-FoldChange <- as.data.frame(apply(aggregatedCtrls.countOnly, 2, function(x) log2(x+16)-log2(JakSTAT.pool+16) ))
+FoldChange.ctrlNoGrowthEffect <- as.data.frame(apply(aggregatedCtrls.countOnly, 2, function(x) log2(x+16)-log2(JakSTAT.pool+16) ))
+
+
+
+##
+# Make the gRNA name the label of the row
+
+CtrlGrowthEffect <- CtrlGrowthEffect.file[,-1]
+rownames(CtrlGrowthEffect) <- CtrlGrowthEffect.file[,1]
+
+CtrlNoCut <- CtrlNoCut.file[,-1]
+rownames(CtrlNoCut) <- CtrlNoCut.file[,1]
+
+CtrlNoGrowthEffect <- CtrlNoGrowthEffect.file[,-1]
+rownames(CtrlNoGrowthEffect) <- CtrlNoGrowthEffect.file[,1]
+
+JakSTAT <- JakSTAT.file[,-1]
+rownames(JakSTAT) <- JakSTAT.file[,1]
+
+
+
+bonnal.expression.matrix <- bonnal.expression.matrix_NoRowName[,-1]
+rownames(bonnal.expression.matrix) <- bonnal.expression.matrix_NoRowName[,1]
+
+#
+
+
+FoldChange.CtrlGrowthEffect <- as.data.frame(apply(aggregatedCtrls.countOnly, 2, function(x) log2(x+16)-log2(JakSTAT.pool+16) ))
+FoldChange.CtrlNoCut <- as.data.frame(apply(aggregatedCtrls.countOnly, 2, function(x) log2(x+16)-log2(JakSTAT.pool+16) ))
+FoldChange.JakSTAT <- as.data.frame(apply(aggregatedCtrls.countOnly, 2, function(x) log2(x+16)-log2(JakSTAT.pool+16) ))
 
 
 
@@ -71,6 +100,11 @@ ggplot(data=FoldChange, aes(x=SUR1.250x.A.DPI15, y=SUR3.250x.A.DPI15)) +
     geom_abline(intercept = 0, slope = 1)
 # There are indeed differences in foldchange across that there sample. Back to the plan. 
        
+
+
+
+
+
 
 # Compute difference between Pool & Sample 
 
