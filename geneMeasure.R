@@ -48,14 +48,14 @@ aggregatedCtrls <- aggregate(x=rand.CtrlNoGrowthEffect, by = list(index), FUN=su
 
 
         # Dummy df 
-        test.df <- data.frame(replicate(5,sample(0:1,5,rep=TRUE)))
-        colnames(test.df) <- c("pool", " 1", " 2", " 3", " 4")
+        # test.df <- data.frame(replicate(5,sample(0:1,5,rep=TRUE)))
+        # colnames(test.df) <- c("pool", " 1", " 2", " 3", " 4")
         
         # Remove the pool column
-        pool <- test.df$pool
-        pool <- pool*10
+        # pool <- test.df$pool
+        # pool <- pool*10
 
-        test.df = subset(test.df, select = -c(pool) )
+        # test.df = subset(test.df, select = -c(pool) )
         
         
 JakSTAT.pool <- aggregatedCtrls$JakSTATpool
@@ -81,21 +81,31 @@ JakSTAT <- JakSTAT.file[,-1]
 rownames(JakSTAT) <- JakSTAT.file[,1]
 
 
-
-bonnal.expression.matrix <- bonnal.expression.matrix_NoRowName[,-1]
-rownames(bonnal.expression.matrix) <- bonnal.expression.matrix_NoRowName[,1]
-
-#
+## Get the JakSTAT Pool as a different vector and slice it out
 
 
-FoldChange.CtrlGrowthEffect <- as.data.frame(apply(aggregatedCtrls.countOnly, 2, function(x) log2(x+16)-log2(JakSTAT.pool+16) ))
-FoldChange.CtrlNoCut <- as.data.frame(apply(aggregatedCtrls.countOnly, 2, function(x) log2(x+16)-log2(JakSTAT.pool+16) ))
-FoldChange.JakSTAT <- as.data.frame(apply(aggregatedCtrls.countOnly, 2, function(x) log2(x+16)-log2(JakSTAT.pool+16) ))
+CtrlGrowthEffect.pool <- CtrlGrowthEffect$JakSTATpool
+CtrlGrowthEffect <- subset(CtrlGrowthEffect, select = -c(JakSTATpool))
 
+CtrlNoCut.pool <- CtrlNoCut$JakSTATpool
+CtrlNoCut <- subset(CtrlNoCut, select = -c(JakSTATpool))
+
+CtrlNoGrowthEffect.pool <- CtrlNoGrowthEffect$JakSTATpool
+CtrlNoGrowthEffect <- subset(CtrlNoGrowthEffect, select = -c(JakSTATpool))
+
+JakSTAT.pool <- JakSTAT$JakSTATpool
+JakSTAT <- subset(JakSTAT, select = -c(JakSTATpool))
+
+## Calculate foldchange for all samples
+
+FoldChange.CtrlGrowthEffect <- as.data.frame(apply(CtrlGrowthEffect, 2, function(x) log2(x+16)-log2(CtrlGrowthEffect.pool+16) ))
+FoldChange.CtrlNoCut <- as.data.frame(apply(CtrlNoCut, 2, function(x) log2(x+16)-log2(CtrlNoCut.pool+16) ))
+FoldChange.CtrlNoGrowthEffect <- as.data.frame(apply(CtrlNoGrowthEffect, 2, function(x) log2(x+16)-log2(CtrlNoGrowthEffect.pool+16) ))
+FoldChange.JakSTAT <- as.data.frame(apply(JakSTAT, 2, function(x) log2(x+16)-log2(JakSTAT.pool+16) ))
 
 
 # HEY LOOK A PLOT
-ggplot(data=FoldChange, aes(x=SUR1.250x.A.DPI15, y=SUR3.250x.A.DPI15)) +
+ggplot(data=FoldChange.JakSTAT, aes(x=SUR1.250x.A.DPI22, y=SUR3.250x.A.DPI22)) +
     geom_point() +
     geom_abline(intercept = 0, slope = 1)
 # There are indeed differences in foldchange across that there sample. Back to the plan. 
