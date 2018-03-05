@@ -1,6 +1,8 @@
 setwd("~/Desktop/Petra Palenikova/")
 
 library(ggplot2)
+library(reshape)
+library(tidyr)
 
 CtrlGrowthEffect.file <- read.csv(header = TRUE, "dataSUR/ControlGrowth.csv") 
 # Control, cutting gRNAs targeting genes that DO affect cell fitness (aka essential genes). These gRNAs will kill cells (i.e. drop out) no matter what is the effect on the STAT5 reporter
@@ -41,7 +43,8 @@ indx <- sapply(rand.CtrlNoGrowthEffect, is.factor)
 rand.CtrlNoGrowthEffect[indx] <- lapply(rand.CtrlNoGrowthEffect[indx], function(x) as.numeric(as.character(x)))
 
 ## Combine numbers on the basis of their index 
-aggregatedCtrls <- aggregate(x=rand.CtrlNoGrowthEffect, by = list(index), FUN=sum)
+CtrlNoGrowthEffect.agg <- aggregate(x=rand.CtrlNoGrowthEffect, by = list(index), FUN=sum)
+CtrlNoGrowthEffect.agg <- subset(CtrlNoGrowthEffect.agg, select = -c(Group.1))
 
 # Compute Y=log2(x+16)-log2(CTRL+16) for all guides, in all samples. 
 # The CTRL is the Jak STAT pool number. 16 is a Leo chosen number, used to make the fold changes seem a little less dramatic. This calculation is the difference between the control and the effect of the gRNA - so it is the measure of how much that gene is needed for the cell to prolifterate.
@@ -58,10 +61,10 @@ aggregatedCtrls <- aggregate(x=rand.CtrlNoGrowthEffect, by = list(index), FUN=su
         # test.df = subset(test.df, select = -c(pool) )
         
         
-JakSTAT.pool <- aggregatedCtrls$JakSTATpool
-aggregatedCtrls.countOnly <- subset(aggregatedCtrls, select = -c(Kosuke_Id, Group.1, JakSTATpool))
+# aggregatedCtrls.pool <- aggregatedCtrls$JakSTATpool
+# aggregatedCtrls.countOnly <- subset(aggregatedCtrls, select = -c(Kosuke_Id, Group.1, JakSTATpool))
 
-FoldChange.ctrlNoGrowthEffect <- as.data.frame(apply(aggregatedCtrls.countOnly, 2, function(x) log2(x+16)-log2(JakSTAT.pool+16) ))
+# FoldChange.ctrlNoGrowthEffect <- as.data.frame(apply(aggregatedCtrls.countOnly, 2, function(x) log2(x+16)-log2(JakSTAT.pool+16) ))
 
 
 
@@ -74,8 +77,9 @@ rownames(CtrlGrowthEffect) <- CtrlGrowthEffect.file[,1]
 CtrlNoCut <- CtrlNoCut.file[,-1]
 rownames(CtrlNoCut) <- CtrlNoCut.file[,1]
 
-CtrlNoGrowthEffect <- CtrlNoGrowthEffect.file[,-1]
-rownames(CtrlNoGrowthEffect) <- CtrlNoGrowthEffect.file[,1]
+## Note cannot make NAs rownames, and gRNAs were lost in the aggregation of 5gRNAs.
+CtrlNoGrowthEffect <- CtrlNoGrowthEffect.agg[,-1]
+# rownames(CtrlNoGrowthEffect) <- CtrlNoGrowthEffect.agg[,1]
 
 JakSTAT <- JakSTAT.file[,-1]
 rownames(JakSTAT) <- JakSTAT.file[,1]
@@ -98,23 +102,77 @@ JakSTAT <- subset(JakSTAT, select = -c(JakSTATpool))
 
 ## Calculate foldchange for all samples
 
-FoldChange.CtrlGrowthEffect <- as.data.frame(apply(CtrlGrowthEffect, 2, function(x) log2(x+16)-log2(CtrlGrowthEffect.pool+16) ))
-FoldChange.CtrlNoCut <- as.data.frame(apply(CtrlNoCut, 2, function(x) log2(x+16)-log2(CtrlNoCut.pool+16) ))
-FoldChange.CtrlNoGrowthEffect <- as.data.frame(apply(CtrlNoGrowthEffect, 2, function(x) log2(x+16)-log2(CtrlNoGrowthEffect.pool+16) ))
-FoldChange.JakSTAT <- as.data.frame(apply(JakSTAT, 2, function(x) log2(x+16)-log2(JakSTAT.pool+16) ))
+# make sure this actually works
+# test.df <- data.frame(replicate(5,sample(0:1,5,rep=TRUE)))
+# test.col <- data.frame(replicate(1,sample(0:3,5,rep=TRUE)))
+# colnames(test.col) <- "Cat"
+# testApply <- as.data.frame(apply(test.df, 2, function(x) x+test.col ))
+
+
+rawFoldChange.CtrlGrowthEffect <- as.data.frame(apply(CtrlGrowthEffect, 2, function(x) log2(x+16)-log2(CtrlGrowthEffect.pool+16) ))
+rawFoldChange.CtrlNoCut <- as.data.frame(apply(CtrlNoCut, 2, function(x) log2(x+16)-log2(CtrlNoCut.pool+16) ))
+rawFoldChange.CtrlNoGrowthEffect <- as.data.frame(apply(CtrlNoGrowthEffect, 2, function(x) log2(x+16)-log2(CtrlNoGrowthEffect.pool+16) ))
+rawFoldChange.JakSTAT <- as.data.frame(apply(JakSTAT, 2, function(x) log2(x+16)-log2(JakSTAT.pool+16) ))
+
+## Finding the median across guides.
+medCalc.CtrlGrowthEffect <- as.data.frame(apply(rawFoldChange.CtrlGrowthEffect, 1, median ))
+colnames(medCalc.CtrlGrowthEffect) <- "median"
+med.CtrlGrowthEffect <- medCalc.CtrlGrowthEffect$median
+
+medCalc.CtrlNoCut <- as.data.frame(apply(rawFoldChange.CtrlNoCut, 1, median  ))
+colnames(medCalc.CtrlNoCut) <- "median"
+med.CtrlNoCut <- medCalc.CtrlNoCut$median
+
+medCalc.CtrlNoGrowthEffect <- as.data.frame(apply(rawFoldChange.CtrlNoGrowthEffect, 1, median  ))
+colnames(medCalc.CtrlNoGrowthEffect) <- "median"
+med.CtrlNoGrowthEffect <- medCalc.CtrlNoGrowthEffect$median
+
+medCalc.JakSTAT <- as.data.frame(apply(rawFoldChange.JakSTAT,  1, median  ))
+colnames(medCalc.JakSTAT) <- "median"
+med.JakSTAT <- medCalc.JakSTAT$median
+
+
+
+## Subtract the median from the foldchange
+FC.CtrlGrowthEffect <- as.data.frame(apply(rawFoldChange.CtrlGrowthEffect, 2, function(x) x - med.CtrlGrowthEffect))
+FC.CtrlNoCut <- as.data.frame(apply(rawFoldChange.CtrlNoCut, 2, function(x) x - med.CtrlNoCut))
+FC.CtrlNoGrowthEffect <- as.data.frame(apply(rawFoldChange.CtrlNoGrowthEffect, 2, function(x) x - med.CtrlNoGrowthEffect))
+FC.JakSTAT <- as.data.frame(apply(rawFoldChange.JakSTAT, 2, function(x) x - med.JakSTAT))
+
+## Extract the gene name
+FC.CtrlGrowthEffect$gRNA <- rownames(FC.CtrlGrowthEffect)
+smol <- head(FC.CtrlGrowthEffect, n=4)
+smol <- subset(smol, select = c(gRNA, SUR7.50x.C.DPI7,SUR7.50x.C.DPI15))
+
+sep.smol <- separate(smol, gRNA, c("gene1", "gene2", "other", "exon"))
+combine.smol <- unite(sep.smol, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
+new.smol <- subset(combine.smol, select = -c(gene1, gene2, other))
+  
+### Okay choice here. Combine all of the genes or just the exons?
+
 
 
 # HEY LOOK A PLOT
-ggplot(data=FoldChange.JakSTAT, aes(x=SUR1.250x.A.DPI22, y=SUR3.250x.A.DPI22)) +
+ggplot(data=FC.CtrlNoGrowthEffect, aes(x=SUR1.250x.A.DPI7, y=SUR1.250x.A.DPI22)) +
+  theme_bw() +
     geom_point() +
     geom_abline(intercept = 0, slope = 1)
 # There are indeed differences in foldchange across that there sample. Back to the plan. 
        
 
 
+## Calculting median(noGrowthGuides)
+
+# Combine all data into a single column
+oneCol.CtrlNoGrowthEffect <- melt(CtrlNoGrowthEffect,var='remain')
+CtrlNoGrowthEffect.all.med <- median(oneCol.CtrlNoGrowthEffect$value)
 
 
 
+## Test combine columns
+# test.df <- data.frame(replicate(5,sample(0:10,5,rep=TRUE)))
+# colnames(test.df) <- c("first", "second", "third", "fourth", "fifth")
+# melt(test.df,var='remain')
 
 # Compute difference between Pool & Sample 
 
