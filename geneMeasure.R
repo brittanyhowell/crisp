@@ -139,15 +139,40 @@ FC.CtrlNoCut <- as.data.frame(apply(rawFoldChange.CtrlNoCut, 2, function(x) x - 
 FC.CtrlNoGrowthEffect <- as.data.frame(apply(rawFoldChange.CtrlNoGrowthEffect, 2, function(x) x - med.CtrlNoGrowthEffect))
 FC.JakSTAT <- as.data.frame(apply(rawFoldChange.JakSTAT, 2, function(x) x - med.JakSTAT))
 
-## Extract the gene name
-FC.CtrlGrowthEffect$gRNA <- rownames(FC.CtrlGrowthEffect)
-smol <- head(FC.CtrlGrowthEffect, n=4)
-smol <- subset(smol, select = c(gRNA, SUR7.50x.C.DPI7,SUR7.50x.C.DPI15))
+## Extract the gene name, make gene and exon new columns
 
-sep.smol <- separate(smol, gRNA, c("gene1", "gene2", "other", "exon"))
-combine.smol <- unite(sep.smol, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
-new.smol <- subset(combine.smol, select = -c(gene1, gene2, other))
-  
+# # Test on a smol df
+# smol <- head(FC.CtrlGrowthEffect, n=4)
+# smol <- subset(smol, select = c(gRNA, SUR7.50x.C.DPI7,SUR7.50x.C.DPI15))
+
+# sep.smol <- separate(smol, gRNA, c("gene1", "gene2", "other", "exon"))
+# combine.smol <- unite(sep.smol, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
+# new.smol <- subset(combine.smol, select = -c(gene1, gene2, other))
+
+# Make gRNA name a column again
+FC.CtrlGrowthEffect$gRNA <- rownames(FC.CtrlGrowthEffect)
+FC.CtrlNoCut$gRNA <- rownames(FC.CtrlNoCut)
+FC.CtrlNoGrowthEffect$gRNA <- rownames(FC.CtrlNoGrowthEffect)
+FC.JakSTAT$gRNA <- rownames(FC.JakSTAT)
+
+# Separate gRNA into gene and exon labels
+sep.FC.CtrlGrowthEffect <- separate(FC.CtrlGrowthEffect, gRNA, c("gene1", "gene2", "other", "exon"))
+sep.FC.CtrlNoCut <- separate(FC.CtrlNoCut, gRNA, c("gene1", "gene2", "other", "exon"))
+sep.FC.CtrlNoGrowthEffect <- separate(FC.CtrlNoGrowthEffect, gRNA, c("gene1", "gene2", "other", "exon"))
+sep.FC.JakSTAT <- separate(FC.JakSTAT, gRNA, c("gene1", "gene2", "other", "exon"))
+
+# Combine gene name columns
+combine.FC.CtrlGrowthEffect <- unite(sep.FC.CtrlGrowthEffect, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
+combine.FC.CtrlNoCut <- unite(sep.FC.CtrlNoCut, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
+combine.FC.CtrlNoGrowthEffect <- unite(sep.FC.CtrlNoGrowthEffect, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
+combine.FC.JakSTAT <- unite(sep.FC.JakSTAT, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
+
+# Remove the unnecessary columns
+gene.FC.CtrlGrowthEffect <- subset(combine.FC.CtrlGrowthEffect, select = -c(gene1, gene2, other))
+gene.FC.CtrlNoCut <- subset(combine.FC.CtrlNoCut, select = -c(gene1, gene2, other))
+gene.FC.CtrlNoGrowthEffect <- subset(combine.FC.CtrlNoGrowthEffect, select = -c(gene1, gene2, other))
+gene.FC.JakSTAT <- subset(combine.FC.JakSTAT, select = -c(gene1, gene2, other))
+
 ### Okay choice here. Combine all of the genes or just the exons?
 
 
