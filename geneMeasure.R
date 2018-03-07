@@ -3,6 +3,9 @@ setwd("~/Desktop/Petra Palenikova/")
 library(ggplot2)
 library(reshape)
 library(tidyr)
+library(pheatmap)
+library(ComplexHeatmap)
+library(RColorBrewer)
 
 CtrlGrowthEffect.file <- read.csv(header = TRUE, "dataSUR/ControlGrowth.csv") 
 # Control, cutting gRNAs targeting genes that DO affect cell fitness (aka essential genes). These gRNAs will kill cells (i.e. drop out) no matter what is the effect on the STAT5 reporter
@@ -139,46 +142,19 @@ FC.CtrlNoCut <- as.data.frame(apply(rawFoldChange.CtrlNoCut, 2, function(x) x - 
 FC.CtrlNoGrowthEffect <- as.data.frame(apply(rawFoldChange.CtrlNoGrowthEffect, 2, function(x) x - med.CtrlNoGrowthEffect))
 FC.JakSTAT <- as.data.frame(apply(rawFoldChange.JakSTAT, 2, function(x) x - med.JakSTAT))
 
-## Extract the gene name, make gene and exon new columns
 
-# # Test on a smol df
-# smol <- head(FC.CtrlGrowthEffect, n=4)
-# smol <- subset(smol, select = c(gRNA, SUR7.50x.C.DPI7,SUR7.50x.C.DPI15))
-
-# sep.smol <- separate(smol, gRNA, c("gene1", "gene2", "other", "exon"))
-# combine.smol <- unite(sep.smol, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
-# new.smol <- subset(combine.smol, select = -c(gene1, gene2, other))
-
-# Make gRNA name a column again
-FC.CtrlGrowthEffect$gRNA <- rownames(FC.CtrlGrowthEffect)
-FC.CtrlNoCut$gRNA <- rownames(FC.CtrlNoCut)
-FC.CtrlNoGrowthEffect$gRNA <- rownames(FC.CtrlNoGrowthEffect)
-FC.JakSTAT$gRNA <- rownames(FC.JakSTAT)
-
-# Separate gRNA into gene and exon labels
-sep.FC.CtrlGrowthEffect <- separate(FC.CtrlGrowthEffect, gRNA, c("gene1", "gene2", "other", "exon"))
-sep.FC.CtrlNoCut <- separate(FC.CtrlNoCut, gRNA, c("gene1", "gene2", "other", "exon"))
-sep.FC.CtrlNoGrowthEffect <- separate(FC.CtrlNoGrowthEffect, gRNA, c("gene1", "gene2", "other", "exon"))
-sep.FC.JakSTAT <- separate(FC.JakSTAT, gRNA, c("gene1", "gene2", "other", "exon"))
-
-# Combine gene name columns
-combine.FC.CtrlGrowthEffect <- unite(sep.FC.CtrlGrowthEffect, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
-combine.FC.CtrlNoCut <- unite(sep.FC.CtrlNoCut, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
-combine.FC.CtrlNoGrowthEffect <- unite(sep.FC.CtrlNoGrowthEffect, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
-combine.FC.JakSTAT <- unite(sep.FC.JakSTAT, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
-
-# Remove the unnecessary columns
-gene.FC.CtrlGrowthEffect <- subset(combine.FC.CtrlGrowthEffect, select = -c(gene1, gene2, other))
-gene.FC.CtrlNoCut <- subset(combine.FC.CtrlNoCut, select = -c(gene1, gene2, other))
-gene.FC.CtrlNoGrowthEffect <- subset(combine.FC.CtrlNoGrowthEffect, select = -c(gene1, gene2, other))
-gene.FC.JakSTAT <- subset(combine.FC.JakSTAT, select = -c(gene1, gene2, other))
 
 ### Okay choice here. Combine all of the genes or just the exons?
 
+## Subset data to make 
+# SUR1.FC.JakSTAR <- subset(FC.JakSTAT, grepl(, SUR1, )
+sub4dman <- as.numeric(head(FC.JakSTAT, n = 5))
+
+# subset(combine.FC.JakSTAT, select = -c(gene1, gene2, other))
 
 
 # HEY LOOK A PLOT
-ggplot(data=FC.CtrlNoGrowthEffect, aes(x=SUR1.250x.A.DPI7, y=SUR1.250x.A.DPI22)) +
+ggplot(data=gene.FC.CtrlGrowthEffect, aes(x=SUR1.250x.A.DPI7, y=SUR1.250x.A.DPI22)) +
   theme_bw() +
     geom_point() +
     geom_abline(intercept = 0, slope = 1)
@@ -203,3 +179,39 @@ CtrlNoGrowthEffect.all.med <- median(oneCol.CtrlNoGrowthEffect$value)
 
 
 #+- combine replicates after stage 2
+
+
+
+## Extract the gene name, make gene and exon new columns
+    
+    # # Test on a smol df
+    # smol <- head(FC.CtrlGrowthEffect, n=4)
+    # smol <- subset(smol, select = c(gRNA, SUR7.50x.C.DPI7,SUR7.50x.C.DPI15))
+    
+    # sep.smol <- separate(smol, gRNA, c("gene1", "gene2", "other", "exon"))
+    # combine.smol <- unite(sep.smol, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
+    # new.smol <- subset(combine.smol, select = -c(gene1, gene2, other))
+    
+    # Make gRNA name a column again
+    FC.CtrlGrowthEffect$gRNA <- rownames(FC.CtrlGrowthEffect)
+    FC.CtrlNoCut$gRNA <- rownames(FC.CtrlNoCut)
+    FC.CtrlNoGrowthEffect$gRNA <- rownames(FC.CtrlNoGrowthEffect)
+    FC.JakSTAT$gRNA <- rownames(FC.JakSTAT)
+    
+    # Separate gRNA into gene and exon labels
+    sep.FC.CtrlGrowthEffect <- separate(FC.CtrlGrowthEffect, gRNA, c("gene1", "gene2", "other", "exon"))
+    sep.FC.CtrlNoCut <- separate(FC.CtrlNoCut, gRNA, c("gene1", "gene2", "other", "exon"))
+    sep.FC.CtrlNoGrowthEffect <- separate(FC.CtrlNoGrowthEffect, gRNA, c("gene1", "gene2", "other", "exon"))
+    sep.FC.JakSTAT <- separate(FC.JakSTAT, gRNA, c("gene1", "gene2", "other", "exon"))
+    
+    # Combine gene name columns
+    combine.FC.CtrlGrowthEffect <- unite(sep.FC.CtrlGrowthEffect, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
+    combine.FC.CtrlNoCut <- unite(sep.FC.CtrlNoCut, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
+    combine.FC.CtrlNoGrowthEffect <- unite(sep.FC.CtrlNoGrowthEffect, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
+    combine.FC.JakSTAT <- unite(sep.FC.JakSTAT, "gene", c("gene1", "gene2"), sep = "_", remove = FALSE)
+    
+    # Remove the unnecessary columns
+    gene.FC.CtrlGrowthEffect <- subset(combine.FC.CtrlGrowthEffect, select = -c(gene1, gene2, other))
+    gene.FC.CtrlNoCut <- subset(combine.FC.CtrlNoCut, select = -c(gene1, gene2, other))
+    gene.FC.CtrlNoGrowthEffect <- subset(combine.FC.CtrlNoGrowthEffect, select = -c(gene1, gene2, other))
+    gene.FC.JakSTAT <- subset(combine.FC.JakSTAT, select = -c(gene1, gene2, other))
