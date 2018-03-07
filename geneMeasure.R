@@ -143,6 +143,12 @@ FC.CtrlNoGrowthEffect <- as.data.frame(apply(rawFoldChange.CtrlNoGrowthEffect, 2
 FC.JakSTAT <- as.data.frame(apply(rawFoldChange.JakSTAT, 2, function(x) x - med.JakSTAT))
 
 
+## Testing the median subtraction works
+# test.df <- data.frame(replicate(5,sample(0:10,5,rep=TRUE)))
+# test.vec <- data.frame(replicate(1,sample(1:5,5,rep=TRUE)))
+# colnames(test.df) <- c("first", "second", "third", "fourth", "fifth")
+# colnames(test.vec) <- "vec"
+# combine <- as.data.frame(apply(test.df, 2, function(x) x-test.vec))
 
 ### Okay choice here. Combine all of the genes or just the exons?
 
