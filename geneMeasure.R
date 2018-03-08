@@ -152,12 +152,22 @@ FC.JakSTAT <- as.data.frame(apply(rawFoldChange.JakSTAT, 2, function(x) x - med.
 
 ### Okay choice here. Combine all of the genes or just the exons?
 
-## Subset data to make 
-# SUR1.FC.JakSTAR <- subset(FC.JakSTAT, grepl(, SUR1, )
-sub4dman <- as.numeric(head(FC.JakSTAT, n = 5))
+## Subset data to make trial for a heatmap
+# sub4dman <- as.data.frame(head(FC.JakSTAT, n = 300))
+# write.table(sub4dman, file="table")
+# sub.4dman <- read.table("table")
+# char.sub <- sapply(sub.4dman, function(x){as.numeric(as.character(x))})
+  
 
-# subset(combine.FC.JakSTAT, select = -c(gene1, gene2, other))
+# Heatmap(char.sub,cluster_rows =TRUE,cluster_columns=TRUE, col = colorRamp2(c(-5, 0, 5), c("purple", "white", "orange")))
+FC.JakSTAT$SUR1.250x.A.DPI7
 
+# Subsetting data by experiment
+SUR1.JakSTAT <- subset(FC.JakSTAT, select = c(SUR1))
+
+SUR1.JakSTAT <- FC.JakSTAT[,c(colnames(FC.JakSTAT)[grep("SUR1",colnames(FC.JakSTAT))])]
+ SUR1.JakSTAT.order <- SUR1.JakSTAT[c(1,5,9,2,6,10,3,7,11,3,8,12)]
+Heatmap(SUR1.JakSTAT.order,cluster_rows =TRUE,cluster_columns=FALSE,  col = colorRamp2(c(-5, 0, 5), c("purple", "white", "orange")))
 
 # HEY LOOK A PLOT
 ggplot(data=gene.FC.CtrlGrowthEffect, aes(x=SUR1.250x.A.DPI7, y=SUR1.250x.A.DPI22)) +
