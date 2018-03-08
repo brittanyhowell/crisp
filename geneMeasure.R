@@ -166,8 +166,42 @@ FC.JakSTAT$SUR1.250x.A.DPI7
 SUR1.JakSTAT <- subset(FC.JakSTAT, select = c(SUR1))
 
 SUR1.JakSTAT <- FC.JakSTAT[,c(colnames(FC.JakSTAT)[grep("SUR1",colnames(FC.JakSTAT))])]
- SUR1.JakSTAT.order <- SUR1.JakSTAT[c(1,5,9,2,6,10,3,7,11,3,8,12)]
-Heatmap(SUR1.JakSTAT.order,cluster_rows =TRUE,cluster_columns=FALSE,  col = colorRamp2(c(-5, 0, 5), c("purple", "white", "orange")))
+SUR1.JakSTAT.order <- SUR1.JakSTAT[c(1,5,9,2,6,10,3,7,11,3,8,12)]
+Heatmap(SUR1.JakSTAT.order,cluster_rows =TRUE,cluster_columns=FALSE,  col = colorRamp2(c(-5, 0, 5), c("purple", "white", "orange")), show_row_names = FALSE)
+
+
+## Performing some correlation studies
+
+# JakSTAT SUR1
+cors <- cor(FC.JakSTAT$SUR1.250x.A.DPI7, FC.JakSTAT$SUR1.250x.B.DPI7)
+cors <- c(cors, cor(FC.JakSTAT$SUR1.250x.A.DPI7, FC.JakSTAT$SUR1.250x.C.DPI7))
+cors <- c(cors, cor(FC.JakSTAT$SUR1.250x.B.DPI7, FC.JakSTAT$SUR1.250x.C.DPI7))
+
+cors <- c(cors, cor(FC.JakSTAT$SUR1.250x.A.DPI15, FC.JakSTAT$SUR1.250x.B.DPI15))
+cors <- c(cors, cor(FC.JakSTAT$SUR1.250x.A.DPI15, FC.JakSTAT$SUR1.250x.C.DPI15))
+cors <- c(cors, cor(FC.JakSTAT$SUR1.250x.B.DPI15, FC.JakSTAT$SUR1.250x.C.DPI15))
+
+cors <- c(cors, cor(FC.JakSTAT$SUR1.250x.A.DPI19, FC.JakSTAT$SUR1.250x.B.DPI19))
+cors <- c(cors, cor(FC.JakSTAT$SUR1.250x.A.DPI19, FC.JakSTAT$SUR1.250x.C.DPI19))
+cors <- c(cors, cor(FC.JakSTAT$SUR1.250x.B.DPI19, FC.JakSTAT$SUR1.250x.C.DPI19))
+
+cors <- c(cors, cor(FC.JakSTAT$SUR1.250x.A.DPI22, FC.JakSTAT$SUR1.250x.B.DPI22))
+cors <- c(cors, cor(FC.JakSTAT$SUR1.250x.A.DPI22, FC.JakSTAT$SUR1.250x.C.DPI22))
+cors <- c(cors, cor(FC.JakSTAT$SUR1.250x.B.DPI22, FC.JakSTAT$SUR1.250x.C.DPI22))
+
+experiments <- c(rep("DPI7",3),rep("DPI15",3), rep("DPI19",3), rep("DPI22",3))
+cors <- as.data.frame(cbind(experiments,round(cors,4)))
+write.csv(cors,"Correlation_BiologicalReplicates_JakSTAT.csv")
+
+# Plot genes/guides on x axis and gene measure on the y. Order them, and spot a point where some are higher than the others. 
+melt.FC.JakSTAT <- melt(FC.JakSTAT)
+ggplot(data=melt.FC.JakSTAT, aes(x=variable, y=value)) +
+  theme_bw() +
+  geom_point() 
+  # geom_abline(intercept = 0, slope = 1)
+
+
+
 
 # HEY LOOK A PLOT
 ggplot(data=gene.FC.CtrlGrowthEffect, aes(x=SUR1.250x.A.DPI7, y=SUR1.250x.A.DPI22)) +
