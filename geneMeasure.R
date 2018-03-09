@@ -162,12 +162,30 @@ FC.JakSTAT <- as.data.frame(apply(rawFoldChange.JakSTAT, 2, function(x) x - med.
 # Heatmap(char.sub,cluster_rows =TRUE,cluster_columns=TRUE, col = colorRamp2(c(-5, 0, 5), c("purple", "white", "orange")))
 FC.JakSTAT$SUR1.250x.A.DPI7
 
-# Subsetting data by experiment
-SUR1.JakSTAT <- subset(FC.JakSTAT, select = c(SUR1))
+# Subsetting data by experiment - JakSTAT
+SUR1.JakSTAT <- JakSTAT[,c(colnames(JakSTAT)[grep("SUR1",colnames(JakSTAT))])]
+SUR2.JakSTAT <- JakSTAT[,c(colnames(JakSTAT)[grep("SUR2",colnames(JakSTAT))])]
+SUR3.JakSTAT <- JakSTAT[,c(colnames(JakSTAT)[grep("SUR3",colnames(JakSTAT))])]
+SUR4.JakSTAT <- JakSTAT[,c(colnames(JakSTAT)[grep("SUR4",colnames(JakSTAT))])]
+SUR5.JakSTAT <- JakSTAT[,c(colnames(JakSTAT)[grep("SUR5",colnames(JakSTAT))])]
+SUR6.JakSTAT <- JakSTAT[,c(colnames(JakSTAT)[grep("SUR6",colnames(JakSTAT))])]
+SUR7.JakSTAT <- JakSTAT[,c(colnames(JakSTAT)[grep("SUR7",colnames(JakSTAT))])]
+SUR8.JakSTAT <- JakSTAT[,c(colnames(JakSTAT)[grep("SUR8",colnames(JakSTAT))])]
 
-SUR1.JakSTAT <- FC.JakSTAT[,c(colnames(FC.JakSTAT)[grep("SUR1",colnames(FC.JakSTAT))])]
+SUR1.FC.JakSTAT <- FC.JakSTAT[,c(colnames(FC.JakSTAT)[grep("SUR1",colnames(FC.JakSTAT))])]
+SUR2.FC.JakSTAT <- FC.JakSTAT[,c(colnames(FC.JakSTAT)[grep("SUR2",colnames(FC.JakSTAT))])]
+SUR3.FC.JakSTAT <- FC.JakSTAT[,c(colnames(FC.JakSTAT)[grep("SUR3",colnames(FC.JakSTAT))])]
+SUR4.FC.JakSTAT <- FC.JakSTAT[,c(colnames(FC.JakSTAT)[grep("SUR4",colnames(FC.JakSTAT))])]
+SUR5.FC.JakSTAT <- FC.JakSTAT[,c(colnames(FC.JakSTAT)[grep("SUR5",colnames(FC.JakSTAT))])]
+SUR6.FC.JakSTAT <- FC.JakSTAT[,c(colnames(FC.JakSTAT)[grep("SUR6",colnames(FC.JakSTAT))])]
+SUR7.FC.JakSTAT <- FC.JakSTAT[,c(colnames(FC.JakSTAT)[grep("SUR7",colnames(FC.JakSTAT))])]
+SUR8.FC.JakSTAT <- FC.JakSTAT[,c(colnames(FC.JakSTAT)[grep("SUR8",colnames(FC.JakSTAT))])]
+
+
+
 SUR1.JakSTAT.order <- SUR1.JakSTAT[c(1,5,9,2,6,10,3,7,11,3,8,12)]
-Heatmap(SUR1.JakSTAT.order,cluster_rows =TRUE,cluster_columns=FALSE,  col = colorRamp2(c(-5, 0, 5), c("purple", "white", "orange")), show_row_names = FALSE)
+
+Heatmap(SUR3.FC.JakSTAT,cluster_rows =TRUE,cluster_columns=FALSE,  col = colorRamp2(c(-5, 0, 5), c("purple", "white", "orange")), show_row_names = FALSE)
 
 
 ## Performing some correlation studies
@@ -215,23 +233,50 @@ experiments <- c(rep("DPI7",3),rep("DPI15",3), rep("DPI19",3), rep("DPI22",3))
 cors <- as.data.frame(cbind(experiments,round(cors,4)))
 write.csv(cors,"Correlation_BiologicalReplcates_JakSTAT.csv")
 
+allCor <- cor(FC.CtrlNoGrowthEffect, method="pearson")
+corrplot(allCor,  method="square", tl.pos="lt", type="full",        
+         tl.col="black", tl.cex=0.6, tl.srt=45, )
 
 
 # Plot genes/guides on x axis and gene measure on the y. Order them, and spot a point where some are higher than the others. 
 melt.FC.JakSTAT <- melt(FC.JakSTAT)
-ggplot(data=melt.FC.JakSTAT, aes(x=variable, y=value)) +
+irder <- order(FC.JakSTAT)
+
+ggplot(data=FC.JakSTAT, aes(x=SUR1.250x.A.DPI22, y=SUR1.250x.B.DPI22)) +
   theme_bw() +
-  geom_point() 
-  # geom_abline(intercept = 0, slope = 1)
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1)
 
 
 
 # JakSTAT$SUR1.250x.A.DPI7, JakSTAT$SUR1.250x.B.DPI7
 # HEY LOOK A PLOT
-ggplot(data=JakSTAT, aes(x=SUR1.250x.B.DPI22, y=SUR1.250x.C.DPI22)) +
+
+
+ordered <- FC.JakSTAT[ order(-FC.JakSTAT[,2]), ]
+
+FC.JakSTAT$SUR1.250x.A.DPI15 <- factor(FC.JakSTAT$SUR1.250x.A.DPI15, levels = FC.JakSTAT$SUR1.250x.A.DPI15[order(-FC.JakSTAT[,2])])
+
+FC.JakSTAT.m1 <- cbind(FC.JakSTAT,condition=sapply(FC.JakSTAT$SUR1.250x.A.DPI22,function(x){ifelse(x < -2,1,0)}))
+
+
+
+ggplot() +
   theme_bw() +
-    geom_point() +
-    geom_abline(intercept = 0, slope = 1)
+  geom_point(data=FC.JakSTAT.m1, aes(x=reorder(rownames(FC.JakSTAT.m1), SUR1.250x.A.DPI22), y=SUR1.250x.A.DPI22, colour=condition),show.legend = F) +
+geom_point(data=FC.JakSTAT.m1, aes(x=reorder(rownames(FC.JakSTAT.m1), SUR3.250x.A.DPI22), y=SUR3.250x.A.DPI15, colour=condition), shape=2 ,show.legend = F) + 
+  theme(axis.text.x = element_blank()) + 
+  xlab("guide - SUR1.250x.A.DPI22/SUR3.250x.A.DPI22") +
+  ylab("Foldchange")
+
+
+  
+
+# col=ifelse(((abs(X)>1.65 & abs(Y)>1.65)),"red", "black"),
+
+# FC.JakSTAT$SUR1.250x.A.DPI22
+# +
+    # geom_abline(intercept = 0, slope = 1)
 # There are indeed differences in foldchange across that there sample. Back to the plan. 
        
 
